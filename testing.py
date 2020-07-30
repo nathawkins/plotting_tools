@@ -1,4 +1,4 @@
-from plot import print_available_colors, single_horizontal_boxplot
+from plot import *
 import numpy as np
 
 print_available_colors()
@@ -12,3 +12,22 @@ single_horizontal_boxplot(data = [np.random.rand(20) for _ in range(5)],
                           title="Trial Boxplot",
                           xticklabels=["0.0", "0.5", "1.0"],
                           savename="trial_boxplot.png")
+
+single_series_single_scatter_plot(xdata = np.random.rand(10), ydata = np.random.rand(10),
+                                  show_comparison_line = True, 
+                                #   xlabel = "X",
+                                  color = "scatter pink",
+                                  marker = "*",
+                                #   ylabel = "Y",
+                                  xticklabels=["0.0", "0.5", "1.0"],
+                                  yticklabels=["0.0", "0.5", "1.0"],
+                                  figsize=(5,5),
+                                #   title="Single Series Scatter",
+                                  savename="trial_single_series_scatter.png")
+
+multiple_series_single_scatter_plot(xdata = [np.random.rand(10) for _ in range(5)], ydata = [np.random.rand(10) for _ in range(5)],
+                                  colors = ["scatter green", "scatter blue", "scatter orange", "scatter pink", "red"],
+                                  markers = ["o", ".", "*", "^", "v"],
+                                  legend = True,
+                                  figsize=(5,5),
+                                  savename="trial_multiple_series_scatter.png")

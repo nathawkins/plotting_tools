@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
 from colr import color
 
-colors = {"orange":"#FF9736", 
+colors = {"k":"black",
+          "orange":"#FF9736", 
           "violet":"#ECE7F2",
           "light blue":"#A1BFDA",
           "darker blue":"#008EBD",
@@ -79,6 +80,161 @@ def single_horizontal_boxplot(data, figsize = (6,5), xlabel = "", ylabel = "", a
 
     ## Saving
     plt.tight_layout()
+    if savename != "":
+        plt.savefig(savename, dpi = dpi, bbox_inches = 'tight')
+    else:
+        plt.show()
+
+def single_series_single_scatter_plot(xdata = [], ydata = [], comparison_line_coords = [[0,1],[0,1]],
+                        show_comparison_line = False, figsize = (6,5), 
+                        xlabel = "", ylabel = "", axis_label_fontsize = 14, title = "",
+                        marker = "o",
+                        title_fontsize = 16, xticks = [], xticklabels = [], xticklabels_fontsize = 12, 
+                        yticks = [], yticklabels = [], yticklabels_fontsize = 12, color = "k", plot_alpha = 0.6,
+                        colors_dict = colors, savename = "", dpi = 300):
+    ## Make figure
+    plt.figure(figsize = figsize)
+    ## Set figure properties for font, get rid of border, and add grid in the background
+    plt.rcParams["font.family"] = "sans-serif"
+    plt.box(False)
+    plt.grid(True, alpha = 0.3)
+    plt.rcParams['axes.axisbelow'] = True
+
+    ## Create axis object
+    ax = plt.gca()
+
+    ## Make scatter plot
+    if show_comparison_line:
+        ax.plot(comparison_line_coords[0], comparison_line_coords[1], c = "k", ls = "-", lw = 1)
+    ax.scatter(xdata, ydata, alpha = plot_alpha, c = colors_dict[color], marker = marker)
+    
+    ## Set xticks
+    if xticks != []:
+        ax.set_xticks(xticks)
+    if xticklabels != []:
+        ## In the event that we have input tick labels but no ticks set,
+        ## matplotlib gets weird about it, so make sure something gets set
+        ## May require additional user input
+        if xticks == []:
+            try:
+                xticks = [float(x) for x in xticklabels]
+            except:
+                xticks = [i+1 for i in range(len(xticklabels))]
+            ax.set_xticks(xticks)
+        ax.set_xticklabels(xticklabels, fontsize = xticklabels_fontsize)
+    else:
+        plt.xticks(fontsize = xticklabels_fontsize)
+    
+    ## Set yticks
+    if yticks != []:
+        ax.set_yticks(yticks)
+    if yticklabels != []:
+        ## In the event that we have input tick labels but no ticks set,
+        ## matplotlib gets weird about it, so make sure something gets set
+        ## May require additional user input
+        if yticks == []:
+            try:
+                yticks = [float(y) for y in yticklabels]
+            except:
+                yticks = [i+1 for i in range(len(yticklabels))]
+            ax.set_yticks(yticks)
+            yticks = [i+1 for i in range(len(yticklabels))]
+        ax.set_yticklabels(yticklabels, fontsize = yticklabels_fontsize)
+    else:
+        plt.yticks(fontsize = yticklabels_fontsize)
+
+    ## Label axes
+    ax.set_xlabel(xlabel, fontsize = axis_label_fontsize)
+    ax.set_ylabel(ylabel, fontsize = axis_label_fontsize)
+
+    ## Set title
+    ax.set_title(title, fontsize = title_fontsize)
+
+    ## Saving
+    plt.tight_layout()
+    if savename != "":
+        plt.savefig(savename, dpi = dpi, bbox_inches = 'tight')
+    else:
+        plt.show()
+
+def multiple_series_single_scatter_plot(xdata = [], ydata = [], comparison_line_coords = [[0,1],[0,1]],
+                        show_comparison_line = False, figsize = (6,5), 
+                        legend = False, legend_labels = [], legend_label_fontsize = 12,
+                        xlabel = "", ylabel = "", axis_label_fontsize = 14, title = "",
+                        markers = [],
+                        title_fontsize = 16, xticks = [], xticklabels = [], xticklabels_fontsize = 12, 
+                        yticks = [], yticklabels = [], yticklabels_fontsize = 12, colors = [], plot_alpha = 0.6,
+                        colors_dict = colors, savename = "", dpi = 300):
+    ## Make figure
+    plt.figure(figsize = figsize)
+    ## Set figure properties for font, get rid of border, and add grid in the background
+    plt.rcParams["font.family"] = "sans-serif"
+    plt.box(False)
+    plt.grid(True, alpha = 0.3)
+    plt.rcParams['axes.axisbelow'] = True
+
+    ## Create axis object
+    ax = plt.gca()
+
+    ## Make scatter plot
+    if show_comparison_line:
+        ax.plot(comparison_line_coords[0], comparison_line_coords[1], c = "k", ls = "-",  lw = 1)
+    ## Check to make sure we have enough labels and colors and markers
+    if len(legend_labels) != len(xdata):
+        legend_labels = [f"Series {i+1}" for i in range(len(xdata))]
+    if len(colors) != len(xdata):
+        colors = ["k" for i in range(len(xdata))]
+    if len(markers) != len(xdata):
+        markers = ["o" for i in range(len(xdata))]
+    for x,y,label,color,marker in zip(xdata, ydata, legend_labels, colors, markers):
+        ax.scatter(x, y, alpha = plot_alpha, c = colors_dict[color], label = label, marker = marker)
+    
+    ## Set xticks
+    if xticks != []:
+        ax.set_xticks(xticks)
+    if xticklabels != []:
+        ## In the event that we have input tick labels but no ticks set,
+        ## matplotlib gets weird about it, so make sure something gets set
+        ## May require additional user input
+        if xticks == []:
+            try:
+                xticks = [float(x) for x in xticklabels]
+            except:
+                xticks = [i+1 for i in range(len(xticklabels))]
+            ax.set_xticks(xticks)
+        ax.set_xticklabels(xticklabels, fontsize = xticklabels_fontsize)
+    else:
+        plt.xticks(fontsize = xticklabels_fontsize)
+    
+    ## Set yticks
+    if yticks != []:
+        ax.set_yticks(yticks)
+    if yticklabels != []:
+        ## In the event that we have input tick labels but no ticks set,
+        ## matplotlib gets weird about it, so make sure something gets set
+        ## May require additional user input
+        if yticks == []:
+            try:
+                yticks = [float(y) for y in yticklabels]
+            except:
+                yticks = [i+1 for i in range(len(yticklabels))]
+            ax.set_yticks(yticks)
+            yticks = [i+1 for i in range(len(yticklabels))]
+        ax.set_yticklabels(yticklabels, fontsize = yticklabels_fontsize)
+    else:
+        plt.yticks(fontsize = yticklabels_fontsize)
+
+    ## Label axes
+    ax.set_xlabel(xlabel, fontsize = axis_label_fontsize)
+    ax.set_ylabel(ylabel, fontsize = axis_label_fontsize)
+
+    ## Set title
+    ax.set_title(title, fontsize = title_fontsize)
+
+    ## Saving
+    plt.tight_layout()
+    if legend:
+        plt.legend(fontsize = legend_label_fontsize)
     if savename != "":
         plt.savefig(savename, dpi = dpi, bbox_inches = 'tight')
     else:
