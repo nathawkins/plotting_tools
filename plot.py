@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from colr import color
 
-colors = {"k":"black",
+colors = {"k":"#000000",
           "orange":"#FF9736", 
           "violet":"#ECE7F2",
           "light blue":"#A1BFDA",
@@ -11,9 +11,18 @@ colors = {"k":"black",
           "scatter green":"#009D78",
           "scatter orange":"#E77B42",
           "scatter blue":"#7877B5",
-          "scatter pink":"#F1348F"}
+          "scatter pink":"#F1348F",
+          "ggplot gray":"#999999", 
+          "ggplot orange":"#E69F00", 
+          "ggplot sky":"#56B4E9", 
+          "ggplot green":"#009E73", 
+          "ggplot yellow":"#F0E442", 
+          "ggplot blue":"#0072B2", 
+          "ggplot red":"#D55E00", 
+          "ggplot pink":"#CC79A7"}
 
 def print_available_colors(colors = colors):
+    print("Colors available in palette.")
     for k in colors.keys():
         print(f"{k}\t{colors[k]}\t{color('    ', fore = colors[k], back = colors[k])}")
 
