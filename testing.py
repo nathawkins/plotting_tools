@@ -36,4 +36,13 @@ single_series_multiple_scatter_plot_single_row(xdata = [np.abs(np.random.rand(10
                                   figsize=(20,5),
                                   xticklabels=["0.0", "0.5", "1.0"],
                                   yticklabels=["0.0", "0.5", "1.0"],
-                                  savename="trial_single_series_scatter_multiple_scatter.png")                                  
+                                  savename="trial_single_series_scatter_multiple_scatter.png")                                
+
+multiple_horizontal_boxplot(data = [[np.abs(np.random.rand(20)) for _ in range(5)] for Z in range(4)], 
+                          xlabel = "X", 
+                          box_colors = ["orange", "violet", "scatter green", "purple", "red"],
+                          ylabel = "Y",
+                          yticklabels = ["Method 1", "Method 2", "Method 3", "Method 4", "Method 5"],
+                          figsize=(20,5),
+                          xticklabels=["0.0", "0.5", "1.0"],
+                          savename="trial_multiple_boxplot.png")                                    

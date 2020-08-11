@@ -327,3 +327,76 @@ def single_series_multiple_scatter_plot_single_row(xdata = [], ydata = [], compa
         plt.savefig(savename, dpi = dpi, bbox_inches = 'tight')
     else:
         plt.show()
+
+def multiple_horizontal_boxplot(data, figsize = (6,5), xlabel = "", ylabel = "", axis_label_fontsize = 14, titles = [],
+            title_fontsize = 16, xticks = [], xticklabels = [], xticklabels_fontsize = 12, 
+            yticks = [], yticklabels = [], yticklabels_fontsize = 12, box_colors = [],
+            median_lw = 2.5, colors_dict = colors, savename = "", dpi = 300):
+
+    ## Make figure
+    fig, axarr = plt.subplots(nrows = 1, ncols = len(data), figsize = figsize, sharey=True)
+    ## Set figure properties for median, font, get rid of border, and add grid in the background
+    medianprops = dict(linestyle='-.', linewidth= median_lw, color='k')
+    plt.rcParams["font.family"] = "sans-serif"
+    plt.rcParams['axes.axisbelow'] = True
+
+    if len(titles) != len(axarr):
+        titles = [f"Plot {i+1}" for i in range(len(axarr))]
+
+    for ax, X, title in zip(axarr, data, titles):
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.spines["bottom"].set_visible(False)
+        ax.spines["left"].set_visible(False)
+        ax.grid(True, alpha = 0.3)
+        ## Make boxplot
+        bplot = ax.boxplot(x = X, vert=False, notch = True, patch_artist = True, medianprops = medianprops)
+
+        ## Set colors of the boxes in the plot
+        for patch, color in zip(bplot["boxes"], [colors_dict[C] for C in box_colors]):
+            patch.set_facecolor(color)
+    
+        ## Set xticks
+        if xticks != []:
+            ax.set_xticks(xticks)
+        if xticklabels != []:
+            ## In the event that we have input tick labels but no ticks set,
+            ## matplotlib gets weird about it, so make sure something gets set
+            ## May require additional user input
+            if xticks == []:
+                try:
+                    xticks = [float(x) for x in xticklabels]
+                except:
+                    xticks = [i+1 for i in range(len(xticklabels))]
+                ax.set_xticks(xticks)
+            ax.set_xticklabels(xticklabels, fontsize = xticklabels_fontsize)
+        else:
+            plt.xticks(fontsize = xticklabels_fontsize)
+        
+        ## Set yticks
+        if yticks != []:
+            ax.set_yticks(yticks)
+        if yticklabels != []:
+            ## In the event that we have input tick labels but no ticks set,
+            ## matplotlib gets weird about it, so make sure something gets set
+            ## May require additional user input
+            if yticks == []:
+                yticks = [i+1 for i in range(len(yticklabels))]
+            ax.set_yticklabels(yticklabels, fontsize = yticklabels_fontsize)
+        else:
+            plt.yticks(fontsize = yticklabels_fontsize)
+
+        ## Label axes
+        ax.set_xlabel(xlabel, fontsize = axis_label_fontsize)
+
+        ## Set title
+        ax.set_title(title, fontsize = title_fontsize)
+
+    axarr[0].set_ylabel(ylabel, fontsize = axis_label_fontsize)
+
+    ## Saving
+    plt.tight_layout()
+    if savename != "":
+        plt.savefig(savename, dpi = dpi, bbox_inches = 'tight')
+    else:
+        plt.show()
