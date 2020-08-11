@@ -147,7 +147,6 @@ def single_series_single_scatter_plot(xdata = [], ydata = [], comparison_line_co
             except:
                 yticks = [i+1 for i in range(len(yticklabels))]
             ax.set_yticks(yticks)
-            yticks = [i+1 for i in range(len(yticklabels))]
         ax.set_yticklabels(yticklabels, fontsize = yticklabels_fontsize)
     else:
         plt.yticks(fontsize = yticklabels_fontsize)
@@ -228,7 +227,6 @@ def multiple_series_single_scatter_plot(xdata = [], ydata = [], comparison_line_
             except:
                 yticks = [i+1 for i in range(len(yticklabels))]
             ax.set_yticks(yticks)
-            yticks = [i+1 for i in range(len(yticklabels))]
         ax.set_yticklabels(yticklabels, fontsize = yticklabels_fontsize)
     else:
         plt.yticks(fontsize = yticklabels_fontsize)
@@ -244,6 +242,87 @@ def multiple_series_single_scatter_plot(xdata = [], ydata = [], comparison_line_
     plt.tight_layout()
     if legend:
         plt.legend(fontsize = legend_label_fontsize)
+    if savename != "":
+        plt.savefig(savename, dpi = dpi, bbox_inches = 'tight')
+    else:
+        plt.show()
+
+def single_series_multiple_scatter_plot_single_row(xdata = [], ydata = [], comparison_line_coords = [[0,1],[0,1]],
+                        show_comparison_line = False, figsize = (6,5), 
+                        xlabel = "", ylabel = "", axis_label_fontsize = 14, titles = [],
+                        markers = [],
+                        title_fontsize = 16, xticks = [], xticklabels = [], xticklabels_fontsize = 12, 
+                        yticks = [], yticklabels = [], yticklabels_fontsize = 12, colors = [], plot_alpha = 0.6,
+                        colors_dict = colors, savename = "", dpi = 300):
+    ## Make figure
+    fig, axarr = plt.subplots(nrows = 1, ncols = len(xdata), figsize = figsize)
+    plt.rcParams["font.family"] = "sans-serif"
+    plt.rcParams['axes.axisbelow'] = True
+    
+    if len(axarr) != len(ydata):
+        raise ValueError("Number of y-axis series does not match number of x-axis series.")
+    if len(titles) != len(axarr):
+        titles = [f"Plot {i+1}" for i in range(len(axarr))]
+    if len(markers) != len(axarr):
+        markers = ["o" for i in range(len(axarr))]
+    if len(colors) != len(axarr):
+        colors = ["k" for i in range(len(axarr))]
+
+    for ax, title, X, Y, C, M in zip(axarr, titles, xdata, ydata, colors, markers):
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.spines["bottom"].set_visible(False)
+        ax.spines["left"].set_visible(False)
+        ax.grid(True, alpha = 0.3)
+        ## Make scatter plot
+        if show_comparison_line:
+            ax.plot(comparison_line_coords[0], comparison_line_coords[1], c = "k", ls = "-",  lw = 1)
+        ## Check to make sure we have enough labels and colors and markers
+        ax.scatter(X, Y, alpha = plot_alpha, c = colors_dict[C], marker = M)
+    
+        ## Set xticks
+        if xticks != []:
+            ax.set_xticks(xticks)
+        if xticklabels != []:
+            ## In the event that we have input tick labels but no ticks set,
+            ## matplotlib gets weird about it, so make sure something gets set
+            ## May require additional user input
+            if xticks == []:
+                try:
+                    xticks = [float(x) for x in xticklabels]
+                except:
+                    xticks = [i+1 for i in range(len(xticklabels))]
+                ax.set_xticks(xticks)
+            ax.set_xticklabels(xticklabels, fontsize = xticklabels_fontsize)
+        else:
+            plt.xticks(fontsize = xticklabels_fontsize)
+        
+        ## Set yticks
+        if yticks != []:
+            ax.set_yticks(yticks)
+        if yticklabels != []:
+            ## In the event that we have input tick labels but no ticks set,
+            ## matplotlib gets weird about it, so make sure something gets set
+            ## May require additional user input
+            if yticks == []:
+                try:
+                    yticks = [float(y) for y in yticklabels]
+                except:
+                    yticks = [i+1 for i in range(len(yticklabels))]
+                ax.set_yticks(yticks)
+            ax.set_yticklabels(yticklabels, fontsize = yticklabels_fontsize)
+        else:
+            plt.yticks(fontsize = yticklabels_fontsize)
+
+        ## Label axes
+        ax.set_xlabel(xlabel, fontsize = axis_label_fontsize)
+        ## Set title
+        ax.set_title(title, fontsize = title_fontsize)
+
+    axarr[0].set_ylabel(ylabel, fontsize = axis_label_fontsize)
+
+    ## Saving
+    plt.tight_layout()
     if savename != "":
         plt.savefig(savename, dpi = dpi, bbox_inches = 'tight')
     else:
