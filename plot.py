@@ -1,4 +1,6 @@
 import matplotlib.pyplot as plt
+from matplotlib.gridspec import GridSpec
+import numpy as np
 from colr import color
 
 colors = {"k":"#000000",
@@ -398,5 +400,168 @@ def multiple_horizontal_boxplot(data, figsize = (6,5), xlabel = "", ylabel = "",
     plt.tight_layout()
     if savename != "":
         plt.savefig(savename, dpi = dpi, bbox_inches = 'tight')
+    else:
+        plt.show()
+
+def comparativeDistributionPlot(x_axis_data, y_axis_data, xlabel, ylabel, 
+                                savename = "",
+                                show_90_10 = False, 
+                                show_min_max = False, 
+                                show_histograms = True,
+                                figsize = (10,10),
+                                show_75_25_color = "ggplot blue",
+                                show_90_10_color = "purple",
+                                show_min_max_color = "k",
+                                median_color = "scatter blue",
+                                x_histogram_color = "darker blue",
+                                y_histogram_color = "darker blue",
+                                log = True,
+                                yticklabels = [],
+                                colors_dict = colors, markersize = 9, fontsize = 12):
+
+    def createOverlappingBins(data, quantiles = np.arange(0,110,10)):
+        indices = [(i, i+2) for i in range(len(quantiles)-2)]
+        quantiles = np.percentile(data, quantiles)
+        return [(quantiles[ind[0]], quantiles[ind[1]]) for ind in indices]
+    
+    bins = createOverlappingBins(x_axis_data)
+
+    if type(x_axis_data) != type(np.array([0])):
+        x_axis_data = np.array(x_axis_data)
+
+    if type(y_axis_data) != type(np.array([0])):
+        y_axis_data = np.array(y_axis_data)
+
+    ## Mask out any entries containing NaNs
+    nan_mask = (~np.isnan(x_axis_data)) & (~np.isnan(y_axis_data))
+    x_axis_data = x_axis_data[nan_mask]
+    y_axis_data = y_axis_data[nan_mask]
+
+    minimums = []
+    maximums = []
+    percentile_10 = []
+    percentile_25 = []
+    percentile_75 = []
+    percentile_90 = []
+    medians = []
+    xticks = []
+
+    for b in bins:
+        mask = (x_axis_data >= b[0]) & (x_axis_data <= b[1])
+        x_masked = x_axis_data[mask]
+        y_masked = y_axis_data[mask]
+
+        tick = round(np.nanmedian(x_masked), 1)
+        if abs(tick) == 0.0:
+            tick = 0.0
+        xticks.append(tick)
+        
+        minimums.append(y_masked.min())
+        maximums.append(y_masked.max())
+        medians.append(np.median(y_masked))
+
+        for p, l in zip([10,25,75,90], [percentile_10, percentile_25,percentile_75,percentile_90]):
+            l.append(np.percentile(y_masked, p))
+        
+    ##Create figure
+    fig = plt.figure(figsize = figsize)
+    plt.rcParams["font.family"] = "sans-serif"
+    plt.rcParams['axes.axisbelow'] = True
+
+    ##Allocate a 4x4 grid for figures
+    gs = GridSpec(4,4)
+
+    ##Define subplots on GridSpec object
+    if show_histograms:
+        ax_joint = fig.add_subplot(gs[0:3,0:3])
+        ax_marg_x = fig.add_subplot(gs[3,0:3])
+        ax_marg_y = fig.add_subplot(gs[0:3,3])
+
+        for ax in [ax_joint, ax_marg_x, ax_marg_y]:
+            ax.spines["top"].set_visible(False)
+            ax.spines["right"].set_visible(False)
+            ax.spines["bottom"].set_visible(False)
+            ax.spines["left"].set_visible(False)
+            ax.grid(True, alpha = 0.3)
+
+    else:
+        ax_joint = plt.gca()
+        ax_joint.spines["top"].set_visible(False)
+        ax_joint.spines["right"].set_visible(False)
+        ax_joint.spines["bottom"].set_visible(False)
+        ax_joint.spines["left"].set_visible(False)
+        ax_joint.grid(True, alpha = 0.3)
+
+    x = list(range(len(xticks)))
+
+    ##First plot filled regions between min/max, 10th/90th percentile, and 
+    ##25th/75th percentile regions
+    if show_min_max:
+        ax_joint.fill_between(x, y1 = minimums, y2 = maximums, color = "k", alpha = 0.05)
+    if show_90_10:
+        ax_joint.fill_between(x, y1 = percentile_10, y2 = percentile_90, color = "k", alpha = 0.05)
+    ax_joint.fill_between(x, y1 = percentile_25, y2 = percentile_75, color = "k", alpha = 0.05)
+
+
+    ##Plot lines corresponding to mean, min, 10th%, 25th%, 75th%, 90th%, and max
+    ##against mean value of interval of column_to_bin
+    ax_joint.plot(x, medians, "o-", color = colors_dict[median_color], label = "Median", markersize = markersize)
+
+    ax_joint.set_xticks(x)
+    ax_joint.set_xticklabels(xticks, fontsize = fontsize)
+    if yticklabels != []:
+        try:
+            yticks = [float(yy) for yy in yticklabels]
+        except:
+            yticks = [i for i in range(len(yticklabels))]
+        ax_joint.set_yticks(yticks)
+        ax_joint.set_yticklabels(yticklabels, fontsize = fontsize)
+    else:
+        yticks = np.linspace(min(medians), max(medians), num = 6)
+        print(yticks)
+        yticks = np.append(yticks, np.array([2*yticks[-1] - yticks[-2]]), axis = 0)
+        print(yticks)
+        yticklabels = [str(round(yy, 1)) for yy in yticks]
+        ax_joint.set_yticks(yticks)
+        ax_joint.set_yticklabels(yticklabels, fontsize = fontsize)
+    
+    
+    ax_joint.plot(x, percentile_25, "v--", label = "25th Percentile", color = colors_dict[show_75_25_color], markersize = markersize)
+    ax_joint.plot(x, percentile_75, "^--", label = "75th Percentile", color = colors_dict[show_75_25_color], markersize = markersize)
+
+    if show_90_10:
+        ax_joint.plot(x, percentile_10, "X--", label = "10th Percentile", color = colors_dict[show_90_10_color], markersize = markersize)
+        ax_joint.plot(x, percentile_90, "P--", label = "90th Percentile", color = colors_dict[show_90_10_color], markersize = markersize)
+
+    if show_min_max:
+        ax_joint.plot(x, minimums, "<--", color = colors_dict[show_min_max_color], label = "Minimum")
+        ax_joint.plot(x, maximums, ">--", color = colors_dict[show_min_max_color], label = "Maximum")
+    ax_joint.legend(fontsize = fontsize)
+
+    ##Create a histogram of all similarity scores between model comparisons
+    ##for both metrics. Histogram on right hand side is the histogram of values from 
+    ##column_to_distribute. Histogram at the top is the histogram of values from
+    ##column_to_bin
+    if show_histograms:
+        ax_marg_x.hist(x_axis_data, log = log, color = colors_dict[x_histogram_color], bins = len(bins), edgecolor = "k")
+        ax_marg_y.hist(y_axis_data, log = log, color = colors_dict[y_histogram_color], orientation="horizontal", bins = len(bins), edgecolor = "k")
+
+        ##Ensure axes ranges match from scatter plot to 
+        ##histograms
+        # plt.setp(ax_marg_x.get_xticklabels(), visible=False)
+        plt.setp(ax_marg_y.get_yticklabels(), visible=False)
+
+        ax_marg_y.set_xlabel('Count', fontsize = fontsize+2)
+        ax_marg_x.set_ylabel('Count', fontsize = fontsize+2)
+
+    ##Label axes in plot
+    ax_joint.set_xlabel(xlabel, fontsize = fontsize+4)
+    ax_joint.set_ylabel(ylabel, fontsize = fontsize+4)
+
+    ##Save figure
+    plt.tight_layout()
+    if savename:
+        plt.savefig(savename, dpi = 400, bbox_inches = 'tight')
+        plt.close(fig)
     else:
         plt.show()
